@@ -26,8 +26,9 @@ app = FastAPI(
 
     **Step 4** — Click the **Authorize 🔒** button at the top right, paste your token, click Authorize
 
-    You can now test all protected endpoints directly from this page.""",
-    version="1.0.0"""
+    You can now test all protected endpoints directly from this page.
+    """,
+    version="1.0.0"
 )
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
