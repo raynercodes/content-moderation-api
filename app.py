@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
+from fastapi.openapi.utils import get_openapi
 from routes.auth_routes import router as auth_router
 from routes.moderation_routes import router as moderation_router
 from utils.logger import logger
@@ -8,10 +10,19 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from utils.limiter import limiter
 
+security = HTTPBearer()
+
 app = FastAPI(
     title="Content Moderation API",
-    description="An AI powered content moderation API built with FastAPI and OpenAI",
-    version="1.0.0"
+    description="""
+    An AI powered content moderation API built with FastAPI and OpenAI via GPT-4o-mini.
+    ## How to test in 3 steps
+    1. Use **POST /auth/register** to create an account — or use the demo account below
+    2. Use **POST /auth/login** to get your access token — demo credentials: **username:** `demo` **password:** `demo123`
+    3. Click the **Authorize 🔒** button at the top right, paste your access token, and click Authorize
+
+    You can now test all protected endpoints directly from this page.",
+    version="1.0.0"""
 )
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
