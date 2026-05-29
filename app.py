@@ -16,12 +16,17 @@ app = FastAPI(
     title="Content Moderation API",
     description="""
     An AI powered content moderation API built with FastAPI and OpenAI via GPT-4o-mini.
-    ## How to test in 3 steps
-    1. Use **POST /auth/register** to create an account — or use the demo account below
-    2. Use **POST /auth/login** to get your access token — demo credentials: **username:** `demo` **password:** `demo123`
-    3. Click the **Authorize 🔒** button at the top right, paste your access token, and click Authorize
 
-    You can now test all protected endpoints directly from this page.",
+    ## How to test in 3 steps
+    **Step 1** — Register: use `POST /auth/register` or skip to Step 2 with the demo account
+
+    **Step 2** — Login: use `POST /auth/login` with `username: demo` and `password: demo123`
+
+    **Step 3** — Copy the `access_token` from the response
+
+    **Step 4** — Click the **Authorize 🔒** button at the top right, paste your token, click Authorize
+
+    You can now test all protected endpoints directly from this page.""",
     version="1.0.0"""
 )
 app.state.limiter = limiter
