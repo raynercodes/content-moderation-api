@@ -14,6 +14,14 @@ def create_moderation(db: Session, user_id: int, content: str, decision: str, re
     db.refresh(moderation)
     return moderation
 
+def update_moderation_result(db: Session, moderation_id: int, decision: str, reason: str) -> None:
+    moderation = db.query(Moderation).filter(Moderation.id == moderation_id).first()
+    if moderation:
+        moderation.decision = decision
+        moderation.reason = reason
+        moderation.status = "completed"
+        db.commit()
+
 def get_moderations_by_user(db: Session, user_id: int, skip: int = 0, limit: int = 10) -> list[Moderation]:
     return (
         db.query(Moderation)

@@ -20,8 +20,9 @@ class Moderation(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     content = Column(Text, nullable=False)
-    decision = Column(String, nullable=False)
+    decision = Column(String, nullable=True)
     reason = Column(Text, nullable=True)
+    status = Column(String, nullable=False, default="pending")
     created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     user = relationship("User", back_populates="moderations")

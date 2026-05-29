@@ -21,52 +21,25 @@ async def moderate_content(db: Session, user_id: int, content: str) -> dict:
     if len(content) > 5000:
         raise ValueError("Content must be under 5000 characters")
 
-    logger.info(f"Moderating content for user_id={user_id}")
+    logger.info(f"Queuing moderation for user_id={user_id}")
 
-    response = await client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": """You are a content moderation assistant. 
-                Analyze the given text and respond with a JSON object containing:
-                - decision: either 'safe', 'flagged', or 'rejected'
-                - reason: a brief explanation of your decision
-                
-                Use these guidelines:
-                - safe: content is appropriate and harmless
-                - flagged: content is potentially problematic but not clearly harmful
-                - rejected: content is clearly harmful, abusive, or violates guidelines
-                
-                Respond with only the JSON object, no other text."""
-            },
-            {
-                "role": "user",
-                "content": content
-            }
-        ],
-        response_format={"type": "json_object"},
-        max_tokens=150
+    moderation = create_moderation(
+        db,
+        user_id=user_id,
+        content=content,
+        decision=None,
+        reason=None
     )
 
-    result = response.choices[0].message.content
-
-    import json
-    parsed = json.loads(result)
-
-    decision = parsed.get("decision", "flagged")
-    reason = parsed.get("reason", "Unable to determine")
-
-    if decision not in ["safe", "flagged", "rejected"]:
-        decision = "flagged"
-
-    moderation = create_moderation(db, user_id, content, decision, reason)
+    from tasks.moderation_task import process_moderation
+    process_moderation.delay(moderation.id, content)
 
     return {
         "id": moderation.id,
         "content": content,
-        "decision": decision,
-        "reason": reason,
+        "decision": None,
+        "reason": None,
+        "status": "pending",
         "created_at": moderation.created_at.isoformat()
     }
 
