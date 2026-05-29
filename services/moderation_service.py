@@ -9,6 +9,8 @@ from repos.moderation_repo import (
 from openai import AsyncOpenAI
 from config import Config
 from utils.logger import logger
+from utils.cache import get_cached, set_cached, delete_cached
+from tasks.moderation_task import process_moderation
 
 client = AsyncOpenAI(api_key=Config.OPENAI_API_KEY)
 
@@ -31,7 +33,6 @@ async def moderate_content(db: Session, user_id: int, content: str) -> dict:
         reason=None
     )
 
-    from tasks.moderation_task import process_moderation
     process_moderation.delay(moderation.id, content)
 
     return {
@@ -72,20 +73,38 @@ def get_user_moderations(db: Session, user_id: int, page: int = 1, limit: int = 
     }
 
 def get_user_moderation_by_id(db: Session, user_id: int, moderation_id: int) -> dict:
+    cache_key = f"moderation:{user_id}:{moderation_id}"
+    cached = get_cached(cache_key)
+
+    if cached:
+        return cached
+
     moderation = get_moderation_by_id(db, user_id, moderation_id)
 
     if moderation is None:
         raise ValueError("Moderation not found")
 
-    return {
+    result = {
         "id": moderation.id,
         "content": moderation.content,
         "decision": moderation.decision,
         "reason": moderation.reason,
+        "status": moderation.status,
         "created_at": moderation.created_at.isoformat()
     }
 
+    if moderation.status == "completed":
+        set_cached(cache_key, result, ttl=300)
+
+    return result
+
 def get_user_moderation_stats(db: Session, user_id: int) -> dict:
+    cache_key = f"moderation_stats:{user_id}"
+    cached = get_cached(cache_key)
+
+    if cached:
+        return cached
+
     rows = get_moderation_stats(db, user_id)
 
     stats = {
@@ -95,6 +114,9 @@ def get_user_moderation_stats(db: Session, user_id: int) -> dict:
     }
 
     for decision, count in rows:
-        stats[decision] = count
+        if decision:
+            stats[decision] = count
+
+    set_cached(cache_key, stats, ttl=30)
 
     return stats

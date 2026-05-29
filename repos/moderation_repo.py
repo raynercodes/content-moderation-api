@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from models import Moderation
+from utils.cache import delete_cached
 
 def create_moderation(db: Session, user_id: int, content: str, decision: str, reason: str) -> Moderation:
     moderation = Moderation(
@@ -21,6 +22,7 @@ def update_moderation_result(db: Session, moderation_id: int, decision: str, rea
         moderation.reason = reason
         moderation.status = "completed"
         db.commit()
+        delete_cached(f"moderation:{moderation.user_id}:{moderation_id}")
 
 def get_moderations_by_user(db: Session, user_id: int, skip: int = 0, limit: int = 10) -> list[Moderation]:
     return (
