@@ -28,8 +28,14 @@ An AI powered content moderation API built with FastAPI and OpenAI via GPT-4o-mi
 
 You can now test all protected endpoints directly from this page.
 """,
-    version="1.0.0"
+    version="1.0.0",
+    swagger_ui_parameters={"persistAuthorization": True},
+    openapi_tags=[
+        {"name": "auth", "description": "Authentication endpoints"},
+        {"name": "moderations", "description": "Content moderation endpoints"}
+    ]
 )
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 

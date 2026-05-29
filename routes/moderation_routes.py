@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database import get_db
@@ -14,7 +15,13 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from utils.limiter import limiter
 
-router = APIRouter(prefix="/moderations", tags=["moderations"])
+security = HTTPBearer()
+
+router = APIRouter(
+    prefix="/moderations",
+    tags=["moderations"],
+    dependencies=[Depends(security)]
+)
 
 class ModerateRequest(BaseModel):
     content: str
