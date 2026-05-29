@@ -4,12 +4,17 @@ from routes.auth_routes import router as auth_router
 from routes.moderation_routes import router as moderation_router
 from utils.logger import logger
 from config import Config
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from utils.limiter import limiter
 
 app = FastAPI(
     title="Content Moderation API",
     description="An AI powered content moderation API built with FastAPI and OpenAI",
     version="1.0.0"
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.include_router(auth_router)
 app.include_router(moderation_router)

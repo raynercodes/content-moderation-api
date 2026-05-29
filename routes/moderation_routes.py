@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database import get_db
@@ -10,6 +10,9 @@ from services.moderation_service import (
 )
 from utils.auth import require_access_token
 from utils.responses import success_response
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from utils.limiter import limiter
 
 router = APIRouter(prefix="/moderations", tags=["moderations"])
 
@@ -17,13 +20,15 @@ class ModerateRequest(BaseModel):
     content: str
 
 @router.post("/")
+@limiter.limit("10/minute")
 def moderate(
-    request: ModerateRequest,
+    request: Request,
+    body: ModerateRequest,
     db: Session = Depends(get_db),
     user_id: int = Depends(require_access_token)
 ):
     try:
-        result = moderate_content(db, user_id, request.content)
+        result = moderate_content(db, user_id, body.content)
         return success_response(result, message="Content moderated successfully", status=201)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
