@@ -37,7 +37,8 @@ async def general_error_handler(request: Request, exc: Exception):
     )
 
 @app.get("/")
-def home():
+def home(request: Request):
+    base_url = str(request.base_url).rstrip("/")
     return {
         "name": "Content Moderation API",
         "description": "AI powered content moderation using OpenAI",
@@ -50,7 +51,7 @@ def home():
             "PostgreSQL with Alembic migrations"
         ],
         "github": "https://github.com/raynercodes/content-moderation-api",
-        "docs": "/docs",
+        "interactive_docs": f"{base_url}/docs",
         "status": "running"
     }
 
