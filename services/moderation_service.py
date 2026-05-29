@@ -6,13 +6,13 @@ from repos.moderation_repo import (
     get_moderation_stats,
     get_total_moderations
 )
-from openai import OpenAI
+from openai import AsyncOpenAI
 from config import Config
 from utils.logger import logger
 
-client = OpenAI(api_key=Config.OPENAI_API_KEY)
+client = AsyncOpenAI(api_key=Config.OPENAI_API_KEY)
 
-def moderate_content(db: Session, user_id: int, content: str) -> dict:
+async def moderate_content(db: Session, user_id: int, content: str) -> dict:
     content = (content or "").strip()
 
     if not content:
@@ -23,7 +23,7 @@ def moderate_content(db: Session, user_id: int, content: str) -> dict:
 
     logger.info(f"Moderating content for user_id={user_id}")
 
-    response = client.chat.completions.create(
+    response = await client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {

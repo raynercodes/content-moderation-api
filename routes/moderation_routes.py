@@ -21,14 +21,14 @@ class ModerateRequest(BaseModel):
 
 @router.post("/")
 @limiter.limit("10/minute")
-def moderate(
+async def moderate(
     request: Request,
     body: ModerateRequest,
     db: Session = Depends(get_db),
     user_id: int = Depends(require_access_token)
 ):
     try:
-        result = moderate_content(db, user_id, body.content)
+        result = await moderate_content(db, user_id, body.content)
         return success_response(result, message="Content moderated successfully", status=201)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
