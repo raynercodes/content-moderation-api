@@ -55,9 +55,8 @@ def test_moderate_requires_auth(mock_create, client):
     })
     assert response.status_code == 401
 
-@patch("services.moderation_service.client.chat.completions.create")
-def test_get_moderations_pagination(mock_create, client):
-    mock_create.return_value = mock_openai_response("safe", "Content is appropriate")
+@patch("services.moderation_service.process_moderation")
+def test_get_moderations_pagination(mock_task, client):
     headers = get_auth_headers(client)
     for i in range(3):
         client.post("/moderations/", json={"content": f"test message {i}"}, headers=headers)
@@ -67,9 +66,8 @@ def test_get_moderations_pagination(mock_create, client):
     assert response.json()["data"]["meta"]["total"] == 3
     assert response.json()["data"]["meta"]["total_pages"] == 2
 
-@patch("services.moderation_service.client.chat.completions.create")
-def test_get_moderation_by_id(mock_create, client):
-    mock_create.return_value = mock_openai_response("safe", "Content is appropriate")
+@patch("services.moderation_service.process_moderation")
+def test_get_moderation_by_id(mock_task, client):
     headers = get_auth_headers(client)
     create = client.post("/moderations/", json={"content": "test message"}, headers=headers)
     moderation_id = create.json()["data"]["id"]
