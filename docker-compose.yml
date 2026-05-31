@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16
+    restart: unless-stopped
     container_name: content_moderation_db
     environment:
       POSTGRES_DB: content_moderation
@@ -18,12 +19,14 @@ services:
 
   redis:
     image: redis:7
+    restart: unless-stopped
     container_name: content_moderation_redis
     ports:
       - "6380:6379"
 
   app:
     build: .
+    restart: unless-stopped
     container_name: content_moderation_app
     depends_on:
       db:
@@ -42,6 +45,7 @@ services:
 
   worker:
     build: .
+    restart: unless-stopped
     container_name: content_moderation_worker
     depends_on:
       db:
@@ -58,6 +62,7 @@ services:
 
   flower:
     build: .
+    restart: unless-stopped
     container_name: content_moderation_flower
     depends_on:
       - redis
