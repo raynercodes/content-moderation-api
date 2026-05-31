@@ -60,17 +60,5 @@ services:
       PORT: 8000
     command: celery -A celery_app worker --loglevel=info
 
-  flower:
-    build: .
-    restart: unless-stopped
-    container_name: content_moderation_flower
-    depends_on:
-      - redis
-    environment:
-      REDIS_URL: redis://redis:6379
-    ports:
-      - "5555:5555"
-    command: celery -A celery_app flower --port=5555
-
 volumes:
   postgres_data:
