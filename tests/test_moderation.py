@@ -85,8 +85,11 @@ def test_get_stats(mock_task, client):
     moderation_id_1 = client.post("/moderations/", json={"content": "test"}, headers=headers).json()["data"]["id"]
     
     db = next(override_get_db())
-    from repos.moderation_repo import update_moderation_result
-    update_moderation_result(db, moderation_id_1, "safe", "Content is appropriate")
+    try:
+        from repos.moderation_repo import update_moderation_result
+        update_moderation_result(db, moderation_id_1, "safe", "Content is appropriate")
+    finally:
+        db.close()
     
     response = client.get("/moderations/stats", headers=headers)
     assert response.status_code == 200
