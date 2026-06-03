@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database import get_db
@@ -27,9 +27,10 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/login")
-def login(request: LoginRequest, db: Session = Depends(get_db)):
+def login(request: LoginRequest, req: Request, db: Session = Depends(get_db)):
     try:
-        result = login_user(db, request.username, request.password)
+        ip = req.client.host
+        result = login_user(db, request.username, request.password, ip)
         return success_response(result, message="Login successful")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
