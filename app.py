@@ -71,8 +71,11 @@ def home(request: Request):
         "name": "Content Moderation API",
         "description": "AI powered content moderation using OpenAI",
         "features": [
-            "JWT authentication",
-            "AI content moderation via OpenAI",
+            "JWT authentication with refresh token rotation",
+            "Brute force protection with progressive lockout",
+            "AI content moderation via OpenAI GPT-4o-mini",
+            "Async background processing via Celery",
+            "Redis caching and message brokering",
             "Moderation history with pagination",
             "Moderation stats",
             "Rate limiting",
