@@ -65,4 +65,4 @@ def process_moderation(self, moderation_id: int, content: str):
 
     except Exception as exc:
         logger.error(f"Moderation {moderation_id} failed: {exc}")
-        raise self.retry(exc=exc, countdown=5)
+        raise self.retry(exc=exc, countdown=2 ** self.request.retries * 5)
