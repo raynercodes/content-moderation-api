@@ -75,8 +75,8 @@ async def general_error_handler(request: Request, exc: Exception):
         content={"success": False, "message": "Internal server error", "data": None, "meta": {}}
     )
 
-@app.get("/")
-def home(request: Request, response_class=PrettyJSONResponse):
+@app.get("/", response_class=PrettyJSONResponse)
+def home(request: Request):
     base_url = str(request.base_url).rstrip("/")
     return {
         "name": "Content Moderation API",
