@@ -9,6 +9,7 @@ from config import Config
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from utils.limiter import limiter
+from json import json
 
 security = HTTPBearer()
 
@@ -35,6 +36,16 @@ You can now test all protected endpoints directly from this page.
         {"name": "moderations", "description": "Content moderation endpoints"}
     ]
 )
+
+class PrettyJSONResponse(JSONResponse):
+    def render(self, content) -> bytes:
+        return json.dumps(
+            content,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=2,
+            separators=(", ", ": ")
+        ).encode("utf-8")
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -65,7 +76,7 @@ async def general_error_handler(request: Request, exc: Exception):
     )
 
 @app.get("/")
-def home(request: Request):
+def home(request: Request, response_class=PrettyJSONResponse):
     base_url = str(request.base_url).rstrip("/")
     return {
         "name": "Content Moderation API",
@@ -82,8 +93,21 @@ def home(request: Request):
             "PostgreSQL with Alembic migrations"
         ],
         "github": "https://github.com/raynercodes/content-moderation-api",
+        "LinkedIn": "https://www.linkedin.com/in/leonardo-rayner-raynercodes/",
         "interactive_docs": f"{base_url}/docs",
-        "status": "running"
+        "status": "running",
+        "other_projects": [
+            {
+                "name": "Fintech Serverless API (Loan Lending Platform)",
+                "stack": "AWS Lambda, DynamoDB, SQS FIFO, KMS, CloudFormation — fully serverless",
+                "url": "https://fintech.raynercodes.dev/health"
+            },
+            {
+                "name": "Task Queue API",
+                "stack": "Flask, PostgreSQL, Redis, Docker — deployed on AWS EC2",
+                "url": "https://tasks.raynercodes.dev/"
+            }
+        ]
     }
 
 if __name__ == "__main__":
